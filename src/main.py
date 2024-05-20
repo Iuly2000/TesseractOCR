@@ -29,12 +29,6 @@ def ocr(image):
     extracted_text = pytesseract.image_to_string(image, config='--oem 3 --psm 6')
     return extracted_text
 
-# OCR Function for Parallel Processing
-def process_images_parallel(image_paths):
-    with ThreadPoolExecutor() as executor:
-        results = executor.map(ocr, image_paths)
-    return results
-
 @app.route('/ocr', methods=['POST'])
 def ocr_endpoint():
     # Parse the request JSON data
