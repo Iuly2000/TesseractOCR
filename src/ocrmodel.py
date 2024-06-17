@@ -1,13 +1,9 @@
 import cv2
-from PIL import Image, ImageEnhance, ImageFilter
 import numpy as np
 from keras.models import load_model
-# from spellchecker import SpellChecker
-# import matplotlib.pyplot as plt
-import pytesseract
 
 # Load the trained character recognition model
-model = load_model('emnist_model_new.h5')
+model = load_model('emnist_model.h5')
 
 # Character mapping for EMNIST Letters dataset
 character_map = {
@@ -26,8 +22,8 @@ def segment_image(img_path, threshold=100):
     Returns:
         List of character images.
     """
+    # Load image
     img = cv2.imread(img_path)
-    h, w, _ = img.shape  # assumes color image
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
@@ -41,13 +37,16 @@ def segment_image(img_path, threshold=100):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     binary_img = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
 
-    # run tesseract, returning the bounding boxes
-    boxes = pytesseract.image_to_boxes(binary_img)  # also include any config options you use
+    # Find contours of characters
+    contours, _ = cv2.findContours(binary_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Sort contours from left to right
+    contours = sorted(contours, key=lambda contour: cv2.boundingRect(contour)[0])
+
     character_images = []
-    for b in boxes.splitlines():
-        b = b.split(' ')
-        x1, y1, x2, y2 = int(b[1]), int(b[2]), int(b[3]), int(b[4])
-        char_img = img[h - y2:h - y1, x1:x2]  # Extract the character image
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        char_img = binary_img[y:y + h, x:x + w]
         character_images.append(char_img)
 
     return character_images
@@ -91,8 +90,6 @@ def recognize_book_title(model, img_path):
         # Append the predicted character to the title
         predicted_title += predicted_char
 
-    #spell = SpellChecker()
-    #predicted_title = ' '.join(spell.correction(word) for word in predicted_title.split())
     return predicted_title
 
 

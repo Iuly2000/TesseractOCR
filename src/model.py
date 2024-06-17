@@ -56,11 +56,11 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Train the model
-model.fit(train_images, train_labels, epochs=15, batch_size=32, validation_split=0.3)
+model.fit(train_images, train_labels, epochs=10, batch_size=32, validation_split=0.3)
 
 # Evaluate the model
 test_loss, test_accuracy = model.evaluate(test_images, test_labels)
 print(f'Test accuracy: {test_accuracy}')
 
 # Save the model
-model.save('emnist_model_new2.h5')
+model.save('emnist_model.h5')

@@ -4,7 +4,6 @@ import base64
 from io import BytesIO
 from PIL import Image, ImageEnhance, ImageFilter
 import pytesseract
-from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 CORS(app)
